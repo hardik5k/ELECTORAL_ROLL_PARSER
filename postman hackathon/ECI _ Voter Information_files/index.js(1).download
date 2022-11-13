@@ -1,0 +1,27 @@
+﻿
+function akamai_call2() {
+
+    var st_code = $('#stcode').val();
+
+
+    var acno = $('#acno').val();
+
+    var partno = $('#partno').val();
+
+    var akamaiData = "st_code=" + st_code + "&acno=" + acno + "&partno=" + partno + "";
+    var encodedString = window.btoa(unescape(encodeURIComponent(akamaiData)));
+    var tempAkmailURL = "/Home/GetOfficialDetails";
+    var akamaiUrl = tempAkmailURL + "?id=" + encodedString;
+    var encodeAkamaiUrl = encodeURI(akamaiUrl);
+    window.open(encodeAkamaiUrl, '_blank');
+}
+
+
+$("#fkbd1").click(() => {
+    $('#name1').focus();
+})
+$("#fkbd2").click(() => {
+    $('#txtFName').focus();
+})
+
+

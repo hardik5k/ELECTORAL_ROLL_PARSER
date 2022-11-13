@@ -1,0 +1,168 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+function unicodeToHex(unicode) {
+    var hex, i;
+    var str = "\u6f22\u5b57"; // "\u6f22\u5b57" === "漢字"
+    var result = "";
+    for (i = 0; i < unicode.length; i++) {
+        hex = str.charCodeAt(i).toString(16);
+        result += ("000" + hex).slice(-4);
+    }
+    return result;
+}
+
+function getRequests() {
+   // debugger;
+    var s1 = window.document.location.search.substring(1,
+            window.document.location.search.length).split('&'), r = {}, s2, i;
+    for (i = 0; i < s1.length; i += 1) {
+        s2 = s1[i].split('=');
+        r[decodeURIComponent(s2[0]).toLowerCase()] = decodeURIComponent(s2[1]);
+    }
+    return r;
+}
+function akamai_call(formName, akamaiData) {
+    
+    //var encodedString = window.btoa(unescape(encodeURIComponent(akamaiData)));
+    //var tempAkmailURL = "http://www.nvsp.in/Forms/Forms/";
+    //var akamaiUrl = tempAkmailURL + formName + "?" + encodedString;
+    //var encodeAkamaiUrl = encodeURI(akamaiUrl);
+    //window.open(encodeAkamaiUrl, '_blank');
+    window.open('http://www.nvsp.in/Forms/Forms/', '_blank', 'noopener')
+}
+
+
+
+
+function akamai_call2(akamaiData) {
+   // debugger;
+    var encodedString = window.btoa(unescape(encodeURIComponent(akamaiData)));
+    var tempAkmailURL = "/Home/GetOfficialDetails";
+    var akamaiUrl = tempAkmailURL + "?id=" + encodedString;
+    var encodeAkamaiUrl = encodeURI(akamaiUrl);
+    window.open(encodeAkamaiUrl, '_blank');
+}
+
+
+
+
+
+function printSlip() {
+    window.print();
+}
+
+
+function showPSonMap(st_code1, acno1, partno1, psname, partname, district, state, id) {
+
+  
+    var value;
+    $.ajax({
+        
+        url: "/Home/SearchLatLong?st_code=" + st_code1 + "&acno=" + acno1 + "&partno=" + partno1,
+    success: function (data) {
+        //value = data.data.response.docs[0].lat_long;
+        var data1=JSON.parse(data)
+        value = data1.latlong;
+        //value = "30.90799177,76.85190363";
+       showPSonMap1(value, psname, partname, district, state, id);
+    },
+    error: function () {
+        value = "0.000000,0.000000";
+            alert("Currently location is not available for this polling station.");
+            return;
+    }
+});
+
+    }
+
+
+
+
+
+
+
+function showPSonMap1(value, psname, partname, district, state, id) {
+  // debugger;
+    var psMarker = null;
+  
+    if (value === "0.000000,0.000000" || typeof value === 'undefined' || value=='')
+    {
+        alert("Currently location is not available for this polling station.");
+        return;
+    }
+
+    var location = value.split(",");
+    var lat = parseInt(location[0]);
+    var long = parseInt(location[1]);
+    if ((lat === 0 && long === 0) || Number.isNaN(lat) || Number.isNaN(long))
+    {
+        alert("Currently location is not available for this polling station.");
+        return;
+    }
+
+    if (value !== null && value !== "" && value !== undefined) {
+        $("#dialogViewMap").dialog("open");
+        var map_View = document.getElementById("mapView");
+
+        var latlngStr = value.split(',', 2);
+        var lat = parseFloat(latlngStr[0]);
+        var lng = parseFloat(latlngStr[1]);
+
+        var map_options = {
+            center: new google.maps.LatLng(lat, lng),
+            zoom: 8,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        };
+        var mapView = new google.maps.Map(map_View, map_options);
+
+        var latLng = new google.maps.LatLng(lat, lng);
+        if (psMarker)
+            psMarker.setVisible(false);
+
+        psMarker = new google.maps.Marker({
+            position: latLng,
+            map: mapView
+        });
+
+        psMarker.setVisible(true);
+        mapView.setCenter(psMarker.getPosition());
+        var address;
+        var geocoder = new google.maps.Geocoder();
+        geocoder.geocode({'latLng': latLng}, function (results, status) {
+            address = results[1].formatted_address;
+        });
+
+        var contentValue = "<h3>Polling Station</h3><b>" + psname + " / " + partname + "</b>";
+        if (address !== undefined) {
+            contentValue = contentValue + "<br>Address: " + address + "";
+        }
+        if (district !== undefined) {
+            contentValue = contentValue + "<br/>" + district + "";
+        }
+        if (state !== undefined) {
+            contentValue = contentValue + "&nbsp;&nbsp;" + state + "";
+        }
+
+        var regex = new RegExp("^S|^U");
+        if (id.length === 16 && regex.test(id)) {
+            var st_code = id.substring(0, 3);
+            var ac_no = parseInt(id.substring(3, 6));
+            var part_no = parseInt(id.substring(6, 10));
+            //prev -- contentValue += "<br/><a style='color: blue;float: right' target='_blank' href='pslinfo.jsp?S=" + st_code + "&A=" + ac_no + "&P=" + part_no + "'>See your election officials</a>";
+
+
+            //Changes made by Dnyaneshwar to display official details -- 14-12-2018
+            contentValue += "";
+        }
+        var infowindow = new google.maps.InfoWindow({
+            content: contentValue,
+            maxWidth: 400,
+            maxHeight: 400
+        });
+        infowindow.open(mapView, psMarker);
+    }
+}

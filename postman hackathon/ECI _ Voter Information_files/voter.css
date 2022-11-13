@@ -1,0 +1,142 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/*
+    Created on : Jul 9, 2015, 4:59:30 PM
+    Author     : Kapil Gupta
+*/
+
+.style1 {
+    color: #0066FF;
+    font-weight: bold;
+}
+
+.style2 {
+    text-align: justify;
+}
+
+.style4 {
+    text-align: center;
+    font-size: x-large;
+    font-weight: bold;
+    background-color: gray;
+    color: white
+}
+
+.blue {
+    background: none repeat scroll 0 0 lightgrey;
+    border: 1px solid #c6c6c6;
+    border-radius: 4px;
+    color: #5a5a5a;
+    cursor: pointer;
+    font-family: Helvetica,Arial,Geneva,sans-serif;
+    font-weight: 700;
+    height: auto;
+    line-height: 1.5;
+    padding: 0.25em 1em;
+    text-align: center;
+    text-decoration: none;
+    transition: background-color 0.25s ease-out 0s;
+    width: auto;
+    word-wrap: break-word;
+}
+table {
+    border-collapse: collapse; /* Not really necessary unless you use normalize.js */
+    border-spacing: 0px; /* take out spaces between cells */
+    width: 520px;
+    font-size: small;
+    font-family: Arial, Helvetica, sans-serif;
+    border: 1px solid #000;
+    padding: 2px 15px;
+}
+
+.border_black_bottom{
+    border-bottom: 1px solid #ddd;
+}
+.border_black_left{
+    border-left: 1px solid #ddd;
+}
+.border_black_right{
+    border-right: 1px solid #ddd;
+}
+.border_black_top{
+    border-top: 1px solid #ddd;
+}
+.footer {
+    display: table;
+    font-size: 15px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 12px;
+    text-align: center;
+}
+.TextBoxAsLabel
+{
+    border: none;
+    background-color: #fff;
+    background: transparent;
+    font-size: 12px;
+    height: 40px;
+    white-space: pre-wrap;
+}
+#btnPrint{
+    min-width: 155px;
+    white-space: normal;
+    max-width: 160px;
+    background-color: #258cd1;
+    color: #e2e2e2;
+    transition: background-color 0.25s ease-out 0s;
+}
+#btnPrint:hover{
+    background-color: lightgray;
+    color: black;
+}
+
+
+
+#btnOfficialdtl{
+
+    /*Addded by Dnyaneshwar 14-2-2019*/
+    display: block;
+width: 115px;
+height: 35px;
+padding: 10px;
+text-align: center;
+border-radius: 4px;
+
+    min-width: 155px;
+    white-space: normal;
+    max-width: 160px;
+    background-color: #258cd1;
+    color: #e2e2e2;
+    transition: background-color 0.25s ease-out 0s;
+}
+#btnOfficialdtl:hover{
+    background-color: lightgray;
+    color: black;
+}
+
+/*Added by Dnyaneshwar 14-2-2019*/
+#OffclTable {
+    border-collapse: collapse; /* Not really necessary unless you use normalize.js */
+    border-spacing: 0px; /* take out spaces between cells */
+    width: 520px;
+    font-size: small;
+    font-family: Arial, Helvetica, sans-serif;
+    border: 1px solid #000;
+    padding: 2px 15px;
+    align="center" ;
+
+}
+
+
+
+
+.bg {background: #2f86a8;padding: 10px;}
+ul { margin: 2px 10px; }
+ul li { float: left; list-style-type: none; }
+ul li a { background: #ffffff; color: #000; display: block; font-family: Arial, Helvetica, sans-serif; padding: 10px 20px; text-decoration: none; }
+ul li a:hover { color: #3075AB;}
+.footer{ font-size: 15px; display: table;  text-align: center;   margin-left: auto;   margin-right: auto;  margin-top: 12px; background: #2f86a8; width: 100%;}

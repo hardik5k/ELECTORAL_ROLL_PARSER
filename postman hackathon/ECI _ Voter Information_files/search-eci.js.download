@@ -1,0 +1,1609 @@
+var app = angular.module('myApp', ['loadingService']);
+angular.module('loadingService', [],
+    function ($provide) {
+
+        $provide.factory('myHttpInterceptor', function ($q, $window) {
+
+            return {
+                'response': function (response) {
+
+                    $('#loading').hide();
+                    $('#af').hide();
+                    return response;
+                },
+
+                'responseError': function (rejection) {
+                    $('#loading').hide();
+                    $('#af').hide();
+                    return $q.reject(response);
+                }
+            };
+        });
+    }).directive('ngModelOnFocus', function () {
+        return {
+            priority: 1,
+            restrict: 'A',
+            require: 'ngModel',
+            link: function (scope, elm, attr, ngModelCtrl) {
+                if (attr.type === 'radio' || attr.type === 'checkbox')
+                    return;
+
+                if (attr.id === 'name1' || attr.id === 'txtFName') {
+                    elm.bind("keydown keypress", function (event) {
+                        if (event.which === 13) {
+                            scope.$apply(function () {
+                                ngModelCtrl.$setViewValue(elm.val());
+                            });
+
+                            //event.preventDefault();
+                        }
+                    });
+                    elm.off('input keydown change');
+                    elm.on('blur', function () {
+                        scope.$apply(function () {
+                            ngModelCtrl.$setViewValue(elm.val());
+                        });
+                    });
+                }
+            }
+        };
+    });
+
+
+app.config(function ($httpProvider) {
+
+    var loadingScreen = $('<div id = "af" style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:10000;background-color:gray;background-color:rgba(70,70,70,0.2);"><img style="position:absolute;top:50%;left:50%;" alt="" src="data:image/gif;base64,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" /></div>')
+        .appendTo($('body')).hide();
+    //  $httpProvider.responseInterceptors = $httpProvider.responseInterceptors || [];
+    $httpProvider.interceptors.push('myHttpInterceptor');
+    var spinnerFunction = function (data, headers) {
+        // $('#loading').show();
+        loadingScreen.show();
+
+        return data;
+    };
+    $httpProvider.defaults.transformRequest.push(spinnerFunction);
+});
+
+app.controller('FormCtrl', function ($scope, $http, $location, $anchorScroll) {
+    // URL
+    $scope.searchURL = '/Home/searchVoter';
+    $scope.loadingText = "Loading...";
+    $scope.loaded = "";
+    $scope.myDate = "";
+    $scope.ConstSelectedFrom = "Select Constituency from List";
+    $scope.mobileMap = "Select State from List";
+    $scope.distSelectedFrom = "Select district from List";
+
+
+
+
+
+    $scope.formData = {
+        epic: "",
+        epicSelectedState: ""
+    };
+
+    $scope.captchaImg = "/Home/GetCaptcha?image=true";
+    $scope.accessid = "";
+
+    $scope.mapLocation = "";
+    var currentYear = new Date().getFullYear();
+    var yRange = [];
+    for (var i = currentYear - 17; i >= 1900; i--) {
+        yRange.push(i);
+    }
+    $scope.yearRange = yRange;
+
+    var dRange = [];
+    for (var i = 1; i <= 31; i++) {
+        dRange.push(i);
+    }
+    $scope.dayRange = dRange;
+
+    var aRange = [];
+    for (var i = 18; i <= 120; i++) {
+        aRange.push(i);
+    }
+    $scope.ageRange = aRange;
+
+    $scope.searchAgain = function () {
+        //$route.reload();
+        $scope.submissionSuccess = true;
+        //window.location.reload();
+    };
+
+    $scope.ageParameter = "age";
+    $scope.ageParameterValue = "";
+    $scope.ageSelected = true;
+
+    $scope.gender = "";
+    $scope.$watch('radGender', function (value) {
+        $scope.gender = value;
+        if (value === "" || value == null)
+            $scope.gender = null;
+        // $scope.ageSelected = "false";
+    });
+
+    $scope.value = "age";
+    $scope.toggleAge = function (value) {
+        $scope.ageSelected = !($scope.ageSelected);
+        $scope.ageParameter = value;
+    }
+
+    $scope.formDetails = {
+        name: "default",
+        rln_name: "default",
+        latitude: "default",
+        longitude: "default",
+        rln_type: "default"
+    };
+
+    /*
+     * *****************************************************************************************
+     */
+
+    var voterdetail = "";
+    var temp = "";
+    var isdata = 0;
+    $scope.aaa = -1;
+
+    $scope.callRowData = function (value) {
+        var queryString = "id=" + value.id + "&name=" + value.name + "&epic_no=" + value.epic_no + "&last_update=" + value.last_update + "&gender=" + value.gender + "&rln_name=" + value.rln_name + "&name_v1=" + value.name_v1 + "&rln_name_v1=" + value.rln_name_v1 + "&part_name=" + value.part_name + "&slno_inpart=" + value.slno_inpart + "&ac_name=" + value.ac_name + "&state=" + value.state;
+        //voterdetail = value.epic_no + "@" + value.name + "@" + value.age + "@" + value.state + "@" + value.district + "@" + value.ps_name + "@" + value.slno_inpart + "@" + value.ac_name + "@" + value.pc_name + "@" + value.rln_name + "@" + value.name_v1 + "@" + value.rln_name_v1;
+        temp = queryString;
+        //voterdetail = "";
+        queryString = "";
+        value = "";
+        isdata = 1;
+    }
+
+    $scope.putvalue = function () {
+        if (isdata === 1) {
+            if (temp === "")
+                alert("Please select record..");
+            else {
+                window.open("voter.html?" + temp, '_blank');
+            }
+        }
+    }
+
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+    //Added for Dynamic dropdownlist for states --  by Dnyaneshwar 3-12-2018
+
+
+
+    $scope.GetState = function () {
+        $http.get('/Home/GetStateList').then(function (d) {
+
+            $scope.statedata = d.data;
+
+        }, function () {
+
+            // alert('failed');
+
+        });
+    };
+
+
+    $scope.district = function (stateName) {
+
+        //     debugger;
+        $scope.validState = false;
+
+        $scope.selectedDistrict = "";
+
+        $http.get('/Home/GetDistList?st_code=' + stateName).then(function (d) {
+
+            $scope.distlist = d.data;
+
+
+        }, function () {
+
+            //alert('failed');
+
+        });
+        $scope.acSelected();
+    };
+
+
+    $scope.ac = function (selectedDistrict, stateName) {
+        //    debugger;
+        // $scope.validDistrict = false;
+        $http.get('/Home/GetAcList?dist_no=' + selectedDistrict + '&st_code=' + stateName).then(function (d) {
+
+            $scope.aclist = d.data;
+
+        });
+        $scope.acSelected();
+    };
+
+
+
+
+    //////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+    $scope.viewRecord = function (value) {
+        var queryString = "id=" + value.id + "&name=" + value.name + "&epic_no=" + value.epic_no + "&last_update=" + value.last_update + "&gender=" + value.gender + "&rln_name=" + value.rln_name + "&name_v1=" + value.name_v1 + "&rln_name_v1=" + value.rln_name_v1 + "&part_name=" + value.part_name + "&slno_inpart=" + value.slno_inpart + "&ac_name=" + value.ac_name + "&state=" + value.state;
+        temp = queryString;
+        window.open("voter.html?" + queryString, '_blank');
+    }
+    $scope.psMarker = null;
+
+
+
+
+
+
+
+    $scope.showPSonMap = function (st_code1, acno1, partno1, psname, partname, district, state, id) {
+
+        //debugger;
+        //////////////////////////////////////////////////////////////////
+        var value;
+        $http({ method: 'GET', url: '/Home/SearchLatLong', params: { st_code: st_code1, acno: acno1, partno: partno1 } }).then(function (data) {
+
+            value = data.data.latlong;
+            //value = "30.90799177,76.85190363";
+            $scope.showPSonMap1(value, psname, partname, district, state, id);
+
+
+        }, function () {
+
+            value = "0.000000,0.000000";
+            alert("Currently location is not available for this polling station.");
+            return;
+
+        });
+
+
+        //////////////////////////////////////////////////////////////////
+
+    };
+
+
+
+    //Changes made for requesting captcha after every 5 requests from pager 23-12-2019
+    $scope.Invalidreq = "false";
+
+    //Changes made for requesting captcha after every 5 requests from pager 23-12-2019
+    $scope.clickToOpen = function () {
+        //$("#dialog_box_captcha").dialog("open");
+        document.getElementById('dialog_box_captcha').style.display = 'block';
+        document.getElementById('mainContent').style.display = 'none';
+        document.getElementById('resultArea').style.display = 'none';
+        $scope.Invalidreq = "true";
+
+    }
+
+    $scope.showPSonMap1 = function (value, psname, partname, district, state, id) {
+
+        //debugger;
+
+        if (value === "0.000000,0.000000" || value === null || typeof value === 'undefined' || value == '') {
+            alert("Currently location is not available for this polling station.");
+            return;
+        }
+
+        var location = value.split(",");
+        var lat = parseInt(location[0]);
+        var long = parseInt(location[1]);
+        if ((lat === 0 && long === 0) || Number.isNaN(lat) || Number.isNaN(long)) {
+            alert("Currently location is not available for this polling station.");
+            return;
+        }
+        if (value !== null && value !== "" && value !== undefined) {
+            $("#dialogViewMap").dialog("open");
+
+            //window.open("http://maps.google.com/maps?q="+value);
+            var map_View = document.getElementById("mapView");
+
+            var latlngStr = value.split(',', 2);
+            var lat = parseFloat(latlngStr[0]);
+            var lng = parseFloat(latlngStr[1]);
+
+            var map_options = {
+                center: new google.maps.LatLng(lat, lng),
+                zoom: 8,
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            };
+            var mapView = new google.maps.Map(map_View, map_options);
+            var latLng = new google.maps.LatLng(lat, lng);
+            if ($scope.psMarker)
+                $scope.psMarker.setVisible(false);
+
+            $scope.psMarker = new google.maps.Marker({
+                position: latLng,
+                map: mapView
+            });
+
+            $scope.psMarker.setVisible(true);
+            mapView.setCenter($scope.psMarker.getPosition());
+            var address;
+            var geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ 'latLng': latLng }, function (results, status) {
+                address = results[1].formatted_address;
+            });
+
+            var contentValue = "<h3>Polling Station</h3><b>" + psname + " / " + partname + "</b>";
+            if (address !== undefined) {
+                contentValue = contentValue + "<br>Address: " + address + "";
+            }
+            if (district !== undefined) {
+                contentValue = contentValue + "<br/>" + district + "";
+            }
+            if (state !== undefined) {
+                contentValue = contentValue + "&nbsp;&nbsp;" + state + "";
+            }
+
+            var regex = new RegExp("^S|^U");
+            if (id.length === 16 && regex.test(id)) {
+                var st_code = id.substring(0, 3);
+                var ac_no = parseInt(id.substring(3, 6));
+                var part_no = parseInt(id.substring(6, 10));
+                // contentValue += "<br/><a style='color: blue;float: right' target='_blank' href='http://psleci.nic.in/pslinfoc.aspx?S="+ st_code + "&A=" + ac_no + "&P=" + part_no + "'>See your election officials</a>"; -- prev
+                // contentValue += "<br/><a style='color: blue;float: right' target='_blank' href='pslinfo.jsp?S=" + st_code + "&A=" + ac_no + "&P=" + part_no + "'>See your election officials</a>"; -- prev
+
+
+                contentValue += "";
+                // contentValue += "    <input style='width: 80px' id='btnOfficialdtl' type='button' value='Official Details' onclick='akamai_call2(st_code="+ st_code + "&acno="+ ac_no + "&partno="+ part_no + ");'></input>";
+                //  contentValue += "    <input style='width: 80px' id='btnOfficialdtl' type='button' value='Official Details' onclick='akamai_call2()'></input>";
+
+
+
+
+            }
+            var infowindow = new google.maps.InfoWindow({
+                content: contentValue,
+                maxWidth: 400,
+                maxHeight: 400
+            });
+            infowindow.open(mapView, $scope.psMarker);
+        }
+    };
+
+    /*
+     * *****************************************************************************************
+     */
+
+    $scope.psLocation = {
+        latitude: "",
+        longitude: ""
+    };
+
+    $scope.submissionSuccess = true;
+    $scope.searchType = "details";
+
+    $scope.refinedSearch = false;
+    $scope.txtRefinedSearch = "Refine your Search";
+    $scope.showAdvancedSearch = function () {
+        $scope.refinedSearch = !($scope.refinedSearch);
+        if ($scope.refinedSearch == false) {
+            $scope.txtRefinedSearch = "Refine your search";
+            $scope.searchType = "details";
+        } else {
+            $scope.txtRefinedSearch = "Hide refine search";
+            $scope.searchType = "detail_refine";
+        }
+    };
+
+    /*
+     $scope.isInvalid = function(field){
+     return $scope.form[field].$invalid && $scope.form[field].$dirty;
+     };
+     */
+    $scope.clearMap = function () {
+        $scope.marker.setVisible(false);
+        if ($scope.locationSource == "map") {
+            $scope.mobileMap = "Select State from List";
+            $scope.distSelectedFrom = "Select district from List";
+
+            $scope.locationSource = null;
+            $scope.selectedLocality = null;
+            $scope.ConstSelectedFrom = "Select Constituency from List";
+            $scope.mobileMap = "Select State from List";
+            $scope.stateName = "";
+        }
+    };
+
+    $scope.stateName = "";
+    $scope.selectedState = null;
+    $scope.selectedAC = null;
+    $scope.acList = [];
+    $scope.isLocationSelected = false;
+    $scope.isDistrictSelected = false;
+    $scope.isACSelected = false;
+    $scope.locationSource = null;
+    $scope.selectedDistrict = null;
+
+    $scope.StateSelected = function () {
+        // debugger;
+        $scope.acList = [];
+        $scope.districtList = [];
+        $scope.selectedDistrict = "";
+        $scope.selectedAC = "";
+        removeLocation();
+        //$scope.marker.setVisible(false);
+        $("#btnDetailsSubmit").removeAttr("disabled");
+        if ($scope.locationSource == "map") {
+            $scope.ConstSelectedFrom = "Select Constituency from List";
+            $scope.distSelectedFrom = "Select district from List";
+            $scope.locationSource = null;
+            $scope.mobileMap = "Select State from List";
+            $scope.selectedLocality = $scope.getlocality($scope.selectedState, $scope.selectedDistrict, $scope.selectedAC);
+        }
+
+        if ($scope.stateName == "" || $scope.stateName == null) {
+            $scope.selectedLocality = "";
+            $scope.selectedState = "";
+
+            $scope.districtList = [];
+            $scope.locationSource = null;
+            $scope.mobileMap = "Select State from List";
+            $scope.ConstSelectedFrom = "Select Constituency from List";
+            $scope.distSelectedFrom = "Select district from List";
+            $scope.selectedLocality = $scope.getlocality($scope.selectedState, $scope.selectedDistrict, $scope.selectedAC);
+            return;
+        }
+
+
+
+        var mainInfo = $http.get('DCAC//' + $scope.stateName + '.json').success(function (data) {
+            // console.log(data.response.numFound);
+            $scope.locationSource = "list";
+
+            //testing
+            $scope.districtList = data.dist;
+            $scope.selectedState = data.state;
+            $scope.isLocationSelected = true;
+            $scope.isDistrictSelected = false;
+            $scope.isACSelected = false;
+            $scope.selectedLocality = $scope.selectedState;
+            // $scope.selectedAC = "0";
+            $scope.ConstSelectedFrom = "Select constituency from List";
+            $scope.distSelectedFrom = "Select district from List";
+            $scope.mobileMap = "Select State from List";
+            $scope.selectedLocality = $scope.getlocality($scope.selectedState, $scope.selectedDistrict, $scope.selectedAC);
+
+            //alert($scope.selectedState);
+        });
+    };
+
+    $scope.DistrictSelected = function (dist) {
+        $scope.acList = [];
+
+        $scope.selectedAC = "";
+        removeLocation();
+        //$scope.marker.setVisible(false);
+        $("#btnDetailsSubmit").removeAttr("disabled");
+        if ($scope.locationSource == "map") {
+            $scope.ConstSelectedFrom = "Select Constituency from List";
+            $scope.distSelectedFrom = "Select district from List";
+
+            $scope.mobileMap = "Select State from List";
+            $scope.selectedLocality = $scope.getlocality($scope.selectedState, $scope.selectedDistrict, $scope.selectedAC);
+        }
+
+        if ($scope.selectedDistrict == "" || $scope.selectedDistrict == null) {
+            $scope.selectedDistrict = "";
+            $scope.acList = [];
+            $scope.selectedAC = "";
+
+            $scope.mobileMap = "Select State from List";
+            $scope.isDistrictSelected = false;
+            $scope.isACSelected = false;
+            $scope.ConstSelectedFrom = "Select Constituency from List";
+            $scope.distSelectedFrom = "Select district from List";
+            $scope.selectedLocality = $scope.getlocality($scope.selectedState, $scope.selectedDistrict, $scope.selectedAC);
+            return;
+        }
+
+        $scope.locationSource = "list";
+        $scope.selectedDistrict = dist;
+        // $scope.selectedState = data.state;
+        $scope.isLocationSelected = true;
+        $scope.isDistrictSelected = true;
+        $scope.isACSelected = false;
+        $scope.selectedLocality = $scope.getlocality($scope.selectedState, $scope.selectedDistrict, $scope.selectedAC);
+        $scope.selectedAC = "0";
+        $scope.ConstSelectedFrom = "Select constituency from List";
+        $scope.distSelectedFrom = "Select district from List";
+
+        $scope.mobileMap = "Select State from List";
+
+        angular.forEach($scope.districtList, function (district) {
+            if (district.show == dist) {
+                $scope.acList = district.acs;
+            }
+        });
+    };
+
+    $scope.listSelected = function () {
+        removeLocation();
+        //$scope.marker.setVisible(false);
+        $("#btnDetailsSubmit").removeAttr("disabled");
+        if ($scope.locationSource == "map") {
+            $scope.ConstSelectedFrom = "Select Constituency from List";
+            $scope.distSelectedFrom = "Select district from List";
+            $scope.locationSource = null;
+            $scope.mobileMap = "Select State from List";
+        }
+
+        if ($scope.stateName == "" || $scope.stateName == null) {
+            $scope.selectedLocality = "";
+            $scope.selectedState = "";
+            $scope.acList = [];
+            $scope.locationSource = null;
+            $scope.ConstSelectedFrom = "Select Constituency from List";
+            $scope.distSelectedFrom = "Select district from List";
+            return;
+        }
+
+        //        if ($scope.stateName === "TG")
+        //        {
+        //            alert("Data compilation is in process ! Inconvenience regretted");
+        //            $("#btnDetailsSubmit").attr("disabled", "disabled");
+        //            return;
+        //        }
+
+        //  alert("selected state="+$scope.stateName);
+
+        //$scope.$apply();
+        var mainInfo = $http.get('DCAC//' + $scope.stateName + '.json').success(function (data) {
+            // console.log(data.response.numFound);
+            $scope.locationSource = "list";
+            $scope.districtList = data.response.dist;
+            $scope.selectedState = data.response.state;
+            $scope.isLocationSelected = true;
+            $scope.isACSelected = false;
+            $scope.selectedLocality = $scope.selectedState;
+            $scope.selectedAC = "0";
+            $scope.ConstSelectedFrom = "Select district from List";
+            $scope.distSelectedFrom = "Select district from List";
+            $scope.selectedLocality = $scope.getlocality($scope.selectedState, $scope.selectedDistrict, $scope.selectedAC);
+            //  alert($scope.selectedState);
+        });
+    };
+
+    $scope.getlocality = function (state, district, ac) {
+        //    debugger;
+        if (state === null || state === "") {
+            $scope.selectedState = "";
+            $scope.selectedDistrict = "";
+            $scope.selectedAC = "";
+            $scope.districtList = [];
+            $scope.acList = [];
+            $scope.isLocationSelected = false;
+            $scope.isDistrictSelected = false;
+            $scope.isACSelected = false;
+            return ",,";
+        }
+        else if (district === null || district === "") {
+            $scope.selectedState = state;
+            $scope.selectedDistrict = "";
+            $scope.selectedAC = "";
+            $scope.acList = [];
+            $scope.isLocationSelected = false;
+            $scope.isDistrictSelected = false;
+            $scope.isACSelected = false;
+            return state + ",,";
+        }
+        else if (ac === null || ac === "") {
+            $scope.selectedState = state;
+            $scope.isLocationSelected = true;
+            $scope.selectedAC = "";
+            $scope.selectedDistrict = district;
+            $scope.isDistrictSelected = true;
+            $scope.isACSelected = false;
+            return state + "," + district + ",";
+        }
+        else if (ac !== null || district !== null || state !== null) {
+            $scope.selectedState = state;
+            $scope.isLocationSelected = true;
+
+            $scope.selectedDistrict = district;
+            $scope.isDistrictSelected = true;
+
+            $scope.selectedAC = ac;
+            $scope.isACSelected = true;
+            return state + "," + district + "," + ac;
+        }
+    };
+
+    //$scope.selectedLocality = null;
+    $scope.isACSelected = false;
+
+
+
+    $scope.acSelected = function () {
+        //        if ($scope.selectedAC == null && $scope.selectedDistrict == null) {
+        //            $scope.selectedLocality = $scope.selectedState;
+        //            $scope.selectedAC = "";
+        //            $scope.isACSelected = false;
+        //            return;
+        //        }
+
+        //        console.log("selected AC " + $scope.selectedAC + "  selected locality  :" + $scope.selectedLocality);
+        //     debugger;
+        $scope.isACSelected = true;
+        $scope.locationSource = "list";
+        // var constname = ($scope.acList[$scope.selectedAC - 1].dist) + "," + $scope.acList[$scope.selectedAC - 1].pc;
+
+
+        $scope.selectedLocality = $scope.getlocality($scope.stateName/*selectedState -- Commented by Dnyaneshwar 3-12-2018*/, $scope.selectedDistrict, $scope.selectedAC);
+    };
+
+    $scope.elecAge = null;
+    $scope.dobYear = "";
+    $scope.dobMonth = "";
+    $scope.dobDay = "";
+    $scope.yearSelected = function () {
+        if ($scope.dobYear == null) {
+            $scope.dobMonth = "";
+            $scope.dobDay = "";
+        }
+    }
+    $scope.monthSelected = function () {
+        if ($scope.dobMonth == null || $scope.dobMonth == "")
+            $scope.dobDay = "";
+    }
+    $scope.daySelected = function () {
+        //console.log($scope.dobDay);
+    }
+    $scope.save = function () {
+        formData = $scope.form;
+    };
+
+    $scope.numRecords = "0";
+    $scope.validEpic = false;
+    $scope.allEpicFields = false;
+    $scope.myAge = null;
+    $scope.age = function () {
+        $scope.myAge = $scope.electAge;
+    };
+
+    $scope.isResult = false;
+    $scope.isServiceError = false;
+    $scope.isSuccess = false;
+    $scope.firstSubmit = false;
+    $scope.loadEpicData = function (searchAction) {
+
+        $scope.isnumRecordFound = true;
+        $scope.captchaMsgEpic = "";
+        /**
+         * Conditions for validations etc.
+         */
+        $scope.epicOrDetail = "epic";
+        if ($scope.fromPager == false) {
+            $scope.main.page = 1;
+            $scope.range = null;
+        }
+        if (searchAction) {
+            $scope.fromPager = false;
+        }
+        else {
+            $scope.fromPager = true;
+        }
+
+        if ($scope.form == null) {
+            $scope.validEpic = true;
+            return;
+        }
+        if (($scope.epicCaptcha == null || $scope.epicCaptcha == "") && $scope.fromPager == false) {
+            $scope.captchaMsgEpic = "Please Enter Captcha";
+            return;
+        }
+        $scope.formData = $scope.form;
+
+        //commented for testing 13/06/2021
+        if ($scope.formData == null || $scope.formData.epic == undefined || $scope.formData.epic.length == 0) {
+            $scope.validEpic = true;
+            //$scope.formData.epic.$invalid && $scope.formData.epic.$dirty;
+            return;
+        }
+
+        $scope.isLoading = true;
+        $scope.loaded = $scope.loadingText;
+        $scope.validEpic = false;
+
+        var rere_wewe = _invalidReqUser();
+        //added for '\' in epic
+        if ($scope.formData.epic.includes("\\")) {
+            // console.log("testing")
+            $scope.formData.epic = $scope.formData.epic.replaceAll("\\", "&")
+            // console.log($scope.formData.epic)
+        }
+        $http.post($scope.searchURL, { txtCaptcha: $scope.epicCaptcha, search_type: "epic", reureureired: rere_wewe, epic_no: $scope.formData.epic, state: $scope.formData.epicSelectedState, page_no: $scope.main.page, results_per_page: $scope.recordPerPage }).then((data) => {
+            debugger;
+            $scope.isSuccess = true;
+            $scope.isServiceError = false;
+            $scope.invalidInput = false;
+
+            /**
+             * Visitor Hits
+             */
+            //_hits();
+            $scope.changeCaptcha();
+            if (data != null && data === "null") {
+                window.location = "/Home/Index";
+            }
+
+            if (data === "Wrong Captcha") {
+                $scope.captchaMsgEpic = data;
+                $scope.isResult = false;
+            } else if (data === "Empty Data") {
+                $scope.allEpicFields = true;
+            }
+            else if (data === "<!DOCTYPE html>") {
+                $scope.invalidInput = true;
+                $scope.isSuccess = false;
+                $scope.isResult = false;
+            }
+
+            else {
+                $scope.isnumRecordFound = true;
+                $scope.friends = data.data.response.docs;
+                $scope.numRecords = data.data.response.numFound;
+                $scope.firstSubmit = true;
+                if ($scope.numRecords == 0)
+                    $scope.isResult = false;
+                else
+                    $scope.isResult = true;
+
+                //$scope.isResult = true;
+                var extraPage = 0;
+                if (data.data.response.numFound % $scope.recordPerPage != 0)
+                    extraPage = 1;
+                $scope.totalPages = Math.floor(data.data.response.numFound / $scope.recordPerPage) + extraPage;
+                var range1 = [];
+                var firstRange = 10;
+                if ($scope.range == null || $scope.range.length === 0 || $scope.epicOrDetail === "detail") {
+                    if ($scope.totalPages <= 10)
+                        firstRange = $scope.totalPages;
+                    for (var i = 1; i <= firstRange; i++) {
+                        range1.push(i);
+                    }
+                    /*
+                     var range2 = [];
+                     for(var i=1;i<=$scope.totalPages;i++) {
+                     range1.push(i);
+                     }
+                     */
+                    $scope.range = range1;
+                }
+
+                if ($scope.numRecords <= $scope.recordPerPage) {
+                    $scope.range = [];
+                    $scope.showPager = false;
+                }
+                else
+                    $scope.showPager = true;
+                $scope.isLoading = false;
+                $location.hash('resultArea');
+                // call $anchorScroll()
+                $anchorScroll();
+            }
+        },
+            (error) => {
+                $scope.isServiceError = true;
+                $scope.isSuccess = false;
+
+                $scope.submissionSuccess = true;
+            })
+        //     $http({ method: 'POST', url: $scope.searchURL, params: { txtCaptcha: $scope.epicCaptcha, search_type: "epic", reureureired: rere_wewe, epic_no: $scope.formData.epic, state: $scope.formData.epicSelectedState, page_no: $scope.main.page, results_per_page: $scope.recordPerPage } }).success(function (data) {
+        ////         debugger;
+        //         $scope.isSuccess = true;
+        //         $scope.isServiceError = false;
+        //         $scope.invalidInput = false;
+
+        //         /**
+        //          * Visitor Hits
+        //          */
+        //         //_hits();
+        //         $scope.changeCaptcha();
+        //         if (data != null && data === "null") {
+        //             window.location = "/Home/Index";
+        //         }
+
+        //                 if (data === "Wrong Captcha") {
+        //             $scope.captchaMsgEpic = data;
+        //             $scope.isResult = false;
+        //                 } else if (data === "Empty Data")
+        //                 {
+        //                     $scope.allEpicFields = true;
+        //                 }
+        //         else if(data === "<!DOCTYPE html>"){
+        //             $scope.invalidInput = true;
+        //             $scope.isSuccess = false;
+        //             $scope.isResult = false;
+        //         }
+
+        //         else {
+        //             $scope.isnumRecordFound = true;
+        //             $scope.friends = data.response.docs;
+        //             $scope.numRecords = data.response.numFound;
+        //             $scope.firstSubmit = true;
+        //             if ($scope.numRecords == 0)
+        //                 $scope.isResult = false;
+        //             else
+        //                 $scope.isResult = true;
+
+        //             //$scope.isResult = true;
+        //             var extraPage = 0;
+        //             if (data.data.response.numFound % $scope.recordPerPage != 0)
+        //                 extraPage = 1;
+        //             $scope.totalPages = Math.floor(data.data.response.numFound / $scope.recordPerPage) + extraPage;
+        //             var range1 = [];
+        //             var firstRange = 10;
+        //             if ($scope.range == null || $scope.range.length === 0 || $scope.epicOrDetail === "detail") {
+        //                 if ($scope.totalPages <= 10)
+        //                     firstRange = $scope.totalPages;
+        //                 for (var i = 1; i <= firstRange; i++) {
+        //                     range1.push(i);
+        //                 }
+        //                 /*
+        //                  var range2 = [];
+        //                  for(var i=1;i<=$scope.totalPages;i++) {
+        //                  range1.push(i);
+        //                  }
+        //                  */
+        //                 $scope.range = range1;
+        //             }
+
+        //             if ($scope.numRecords <= $scope.recordPerPage) {
+        //                 $scope.range = [];
+        //                 $scope.showPager = false;
+        //             }
+        //             else
+        //                 $scope.showPager = true;
+        //             $scope.isLoading = false;
+        //             $location.hash('resultArea');
+        //             // call $anchorScroll()
+        //             $anchorScroll();
+        //         }
+        //     }).error(function (data, status, headers, config) {
+        //         $scope.isServiceError = true;
+        //         $scope.isSuccess = false;
+
+        //         $scope.submissionSuccess = true;
+        //     });
+    };
+
+    $scope.epicOrDetail = "detail";
+
+    $scope.showLess = function () {
+        var prev = $scope.range[0];
+        if (prev <= 10)
+            return;
+        var range = [];
+        for (var i = prev - 10; i < prev; i++)
+            range.push(i);
+        $scope.range = range;
+        $scope.goToPage($scope.range[$scope.range.length - 1]);
+    };
+
+    $scope.showMore = function () {
+        var next = $scope.range[$scope.range.length - 1] + 10;
+        if (next >= $scope.totalPages)
+            next = $scope.totalPages;
+        var range = [];
+        //$scope.range = [];
+        for (var i = $scope.range[$scope.range.length - 1] + 1; i <= next; i++) {
+            range.push(i);
+        }
+        $scope.range = range;
+        $scope.goToPage($scope.range[0]);
+    };
+    $scope.fromPager = false;
+    $scope.testData = "test";
+    $scope.random = 0;
+    $scope.refUrl = "";
+    $scope.validName = false;
+    $scope.allDetailsField = false;
+
+    $scope.validRelationName = false;
+    $scope.validAge = false;
+
+
+    $scope.validState = false;
+
+    $scope.validState = false;
+    //$scope.validDistrict = false;
+
+    $scope.pageNo = 0;
+    $scope.totalPages = 3;
+    $scope.recordExist = false;
+    $scope.recordPerPage = 10;
+    $scope.validLocation = false;
+    //$scope.tableParams = null;
+    $scope.range = [];
+    $scope.showPager = false;
+    $scope.isLoading = false;
+    $scope.dobDay1 = 0;
+    $scope.main = {
+        page: 1,
+        take: 15
+    };
+    $scope.isnumRecordFound = false;
+    $scope.showPagination = function (data) {
+
+        //Changes made for requesting captcha after every 5 requests from pager 23-12-2019
+        // $("#dialog_box_captcha").dialog("close");
+        debugger
+        console.log(data)
+        console.log(data.data.response.docs)
+        document.getElementById('dialog_box_captcha').style.display = 'none';
+
+        // users from your api
+        $scope.isLoading = false;
+        $scope.friends = data.data.response.docs;
+        $scope.numRecords = data.data.response.numFound;
+        $scope.firstSubmit = true;
+        $scope.isnumRecordFound = true;
+        if ($scope.numRecords === 0) {
+            $scope.isLoading = false;
+            $scope.isResult = false;
+        }
+        else
+            $scope.isResult = true;
+
+        var extraPage = 0;
+        if (data.data.response.numFound % $scope.recordPerPage !== 0)
+            extraPage = 1;
+        $scope.totalPages = Math.floor(data.data.response.numFound / $scope.recordPerPage) + extraPage;
+        var range1 = [];
+        var firstRange = 10;
+        if ($scope.range === null || $scope.range.length === 0 || $scope.epicOrDetail === "epic") {
+            if ($scope.totalPages <= 10)
+                firstRange = $scope.totalPages;
+            for (var i = 1; i <= firstRange; i++) {
+                range1.push(i);
+            }
+
+            /*
+             var range2 = [];
+             for(var i=1;i<=$scope.totalPages;i++) {
+             range1.push(i);
+             }
+             */
+            $scope.range = range1;
+        }
+
+        if ($scope.numRecords <= $scope.recordPerPage) {
+            $scope.range = [];
+            $scope.showPager = false;
+        }
+        else
+            $scope.showPager = true;
+        //$scope.range = range;
+        // number of pages of users
+        //  $socpe.main.pages = data.pages;
+        $location.hash('resultArea');
+        // call $anchorScroll()
+        $anchorScroll();
+
+        /*
+         * Pagination
+         */
+        if ($scope.isResult === true) {
+            $('#paginationHolder').html('');
+            $('#paginationHolder').html('<ul id="paginationDiv" class="pagination-sm"></ul>');
+
+            $('#page-content').text('Page ' + $scope.main.page + ' out of ' + $scope.totalPages);
+
+            var visiblePages = 10;
+            var screenWidthVar = $(window).width();
+
+            if (screenWidthVar < 360) {
+                visiblePages = 3;
+            } else if (screenWidthVar > 360 && screenWidthVar < 760) {
+                visiblePages = 6;
+            }
+
+            $('#paginationDiv').twbsPagination({
+                startPage: $scope.main.page,
+                totalPages: $scope.totalPages,
+                visiblePages: visiblePages,
+                onPageClick: function (event, page) {
+                    //$('#page-content').text('Page ' + page + ' out of ' + $scope.totalPages);
+                    if (page > 100) {
+                        page = 1;
+                        $scope.goToPage(page);
+                        alert("It seems that your were not able to find your details.\nKindly refine your search");
+                    } else {
+                        $scope.goToPage(page);
+                    }
+                }
+            });
+        }
+    }
+
+    $scope.changeCaptcha = function () {
+        $scope.captchaImg = "/Home/GetCaptcha?image=true&id=" + new Date();
+        $scope.captcha = $scope.epicCaptcha = "";
+        $scope.captchaMsg = "";
+        $scope.isResult = false;
+        $scope.showPager = false;
+        $scope.isnumRecordFound = false;
+        $scope.isServiceError = false;
+        $scope.invalidIput = false;
+        $scope.isSuccess = true;
+    };
+
+    $scope.loadPage = function (searchAction) {
+        $scope.isnumRecordFound = true;
+        $scope.captchaMsg = "";
+        /**
+         * Conditions for validations etc.
+         */
+
+        $scope.epicOrDetail = "detail";
+
+        //Changes made for requesting captcha after every 5 requests from pager 23-12-2019
+        if ($scope.Invalidreq == "true") {
+            $scope.captcha = document.getElementById("dailog_txtCaptcha").value;
+
+        }
+
+        if (searchAction) {
+            $scope.fromPager = false;
+        }
+        else {
+            $scope.fromPager = true;
+        }
+        if ($scope.fromPager == false) {
+            $scope.main.page = 1;
+            $scope.range = null;
+        }
+
+        if ($scope.form == null) {
+
+            $scope.validName = true;
+            return;
+        }
+        $scope.formDetails = $scope.form;
+        //commented for testing 13/06/21
+        if ($scope.formDetails == null || $scope.formDetails.name == null || $scope.formDetails.name.length == 0) {
+
+            $scope.validName = true;
+            //$scope.formDetails.name.$invalid && $scope.formDetails.name.$dirty;
+            return;
+        }
+
+
+        if ($scope.form.rln_name == null || $scope.form.rln_name == "" || $scope.form.rln_name == undefined) {
+            debugger;
+            $scope.validRelationName = true;
+            return;
+        }
+
+        if ($scope.elecAge == null && ($scope.dobYear == "" && $scope.dobMonth == "" && $scope.dobDay == "")) {
+            $scope.validAge = true;
+            return;
+        }
+
+
+
+
+        /////////////////////// dnyaneshwar
+        //debugger;
+        var templocation = document.getElementById("latitude").value + "," + document.getElementById("longitude").value;
+        if ($scope.stateName == "" /*&& ($scope.selectedDistrict == "" || $scope.selectedDistrict == null) */ && templocation == ",") {
+            //debugger;
+            $scope.validState = true;
+            //$scope.validDistrict = true;
+            return;
+        }
+        if ($scope.stateName == "" && templocation == ",") {
+            //debugger;
+            $scope.validState = true;
+            return;
+        }
+        //  if (($scope.selectedDistrict == "" || $scope.selectedDistrict == null) && templocation == ",") {
+        // debugger;
+        //     $scope.validDistrict = true;
+        //   return;
+        //}
+        // if ($scope.elecAge != null || ($scope.dobYear != "" && $scope.dobMonth != "" && $scope.dobDay != "") || ($scope.formDetails.rln_name != null && $scope.formDetails.rln_name != "") ) {
+        //  debugger;
+
+
+        //  }
+        // else
+        // {
+        // debugger;
+        //    alert("Please Enter your Age or Enter Father's / Husband's Name ");
+
+        //    return;
+        // }
+
+
+        if (($scope.captcha == null || $scope.captcha == "") && $scope.fromPager == false) {
+
+            $scope.validCaptcha = true;
+            return;
+        }
+        else {
+            $scope.validCaptcha = false;
+        }
+
+
+        /////////////////////////////////////////////////
+        $scope.isLoading = true;
+        $scope.validName = false;
+
+
+        $scope.validRelationName = false;
+        $scope.validAge = false;
+
+
+
+
+        $scope.validDistrict = false;
+        $scope.validState = false;
+        if ($scope.locationSource == null) {
+            //$scope.validLocation = true;
+            //return;
+            $scope.formDetails.latitude = "";
+            $scope.formDetails.longitude = "";
+        }
+
+        if ($scope.locationSource == "map") {
+            // alert($scope.psLocation.latitude + $scope.psLocation.longitude )
+
+            $scope.formDetails.latitude = $scope.psLocation.latitude;
+            $scope.formDetails.longitude = $scope.psLocation.longitude;
+            $scope.selectedLocality = $scope.formDetails.latitude + "," + $scope.formDetails.longitude;
+        }
+
+        else if ($scope.locationSource == "list") {
+            if ($scope.isDistrictSelected == false && $scope.isACSelected == false)
+                $scope.selectedLocality = $scope.stateName + ",,";
+            if ($scope.isACSelected == false && $scope.isDistrictSelected == true)
+                $scope.selectedLocality = $scope.stateName + "," + $scope.selectedDistrict + ",";
+            if ($scope.isACSelected == true && $scope.isDistrictSelected == true && $scope.isLocationSelected == true)
+                $scope.selectedLocality = $scope.stateName + "," + $scope.selectedDistrict + "," + $scope.selectedAC;
+
+            $scope.formDetails.latitude = "";
+            $scope.formDetails.longitude = "";
+        }
+
+        if ($scope.locationSource == null) {
+            $scope.selectedLocality = null;
+        }
+        if ($scope.dobDay <= 9 && $scope.dobDay != null && $scope.dobDay != "") {
+            $scope.dobDay1 = "0" + $scope.dobDay;
+        } else {
+            $scope.dobDay1 = $scope.dobDay;
+        }
+
+        if ($scope.dobYear != "" && $scope.dobMonth != "" && $scope.dobDay1 != "")
+            $scope.myDate = $scope.dobYear + "-" + $scope.dobMonth + "-" + $scope.dobDay1;
+        else
+            $scope.myDate = null;
+
+        if ($scope.dobYear == null || $scope.dobMonth == null || $scope.dobDay == null)
+            $scope.myDate = null;
+        if ($scope.ageSelected == true)
+            $scope.myDate = null;
+        else
+            $scope.myAge = null;
+
+        var rere_wewe = _invalidReqUser();
+        //        var isCaptchRequired = _isCaptchRequired();
+
+        if ((document.getElementById("latitude").value !== null && document.getElementById("latitude").value !== "") && (document.getElementById("longitude").value != null && document.getElementById("longitude").value != "")) {
+            $scope.selectedLocality = document.getElementById("latitude").value + "," + document.getElementById("longitude").value;
+        }
+        var reqData = null;
+        if ($scope.fromPager) {
+
+            //Added captcha parameter for requesting captcha after every 5 requests from pager 23-12-2019
+            reqData = { fromPager: true, txtCaptcha: $scope.captcha, search_type: "details", reureureired: rere_wewe, name: $scope.formDetails.name, rln_name: $scope.formDetails.rln_name, page_no: $scope.main.page, location: $scope.selectedLocality, results_per_page: $scope.recordPerPage, location_range: "20", age: $scope.elecAge, dob: $scope.myDate, gender: $scope.gender };
+        }
+        else {
+            reqData = { txtCaptcha: $scope.captcha, search_type: "details", reureureired: rere_wewe, name: $scope.formDetails.name, rln_name: $scope.formDetails.rln_name, page_no: $scope.main.page, location: $scope.selectedLocality, results_per_page: $scope.recordPerPage, location_range: "20", age: $scope.elecAge, dob: $scope.myDate, gender: $scope.gender };
+        }
+
+        $http.post($scope.searchURL, reqData).then((data, status) => {
+            $scope.isServiceError = false;
+            $scope.isSuccess = true;
+            $scope.invalidInput = false;
+
+            /**
+             * Visitor Hits
+             */
+            //_hits();
+            $scope.changeCaptcha();
+            //$scope.captchaImg = "./Captcha?image=true&id=" + new Date();
+            if (data !== null && data === "null") {
+                window.location = "/Home/Index";
+            }
+
+            //  Changes made to show error msg for captcha dailog 5 requests from pager 23-12-2019 
+            if (data === "Wrong Captcha") {
+                if ($scope.Invalidreq == "true") {
+                    $scope.captchadailogMsg = data;
+                    return;
+
+                }
+                else {
+                    $scope.captchaMsg = data;
+                    $scope.isResult = false;
+                }
+
+
+                $scope.Invalidreq = "false";
+            }
+            if (data === "Empty Data") {
+
+
+                $scope.allDetailsField = true;
+
+                $scope.Invalidreq = "false";
+            }
+            else {
+                $scope.allDetailsField = false;
+                document.getElementById('mainContent').style.display = 'block';
+                document.getElementById('resultArea').style.display = 'block';
+            }
+            $scope.captchadailogMsg = "";
+            //   Changes made for requesting captcha after every 5 requests from pager 23-12-2019
+            if (data === "Invalid Request") {
+                $scope.clickToOpen();
+                //   $("#dialog_box_captcha").dialog("close");
+                //   $scope.loadPage(false);
+            }
+
+            else if (data === "<!DOCTYPE html>") {
+                $scope.invalidInput = true;
+                $scope.isSuccess = false;
+                $scope.isResult = false;
+            }
+            else if (!data || data === "Error In service") {
+                $scope.isServiceError = true;
+                $scope.isSuccess = false;
+            }
+            else
+                $scope.showPagination(data);
+        }, (error) => {
+            console.log(error)
+        });
+        //     $http({ method: 'POST', url: $scope.searchURL, params: reqData }).success(function (data, status) {
+        ////         debugger;
+        //         $scope.isServiceError = false;
+        //         $scope.isSuccess = true;
+        //         $scope.invalidInput = false;
+
+        //         /**
+        //          * Visitor Hits
+        //          */
+        //         //_hits();
+        //         $scope.changeCaptcha();
+        //         //$scope.captchaImg = "./Captcha?image=true&id=" + new Date();
+        //         if (data !== null && data === "null") {
+        //             window.location = "/Home/Index";
+        //         }
+
+        //         //  Changes made to show error msg for captcha dailog 5 requests from pager 23-12-2019 
+        //         if (data === "Wrong Captcha") {
+        //             if ($scope.Invalidreq == "true") {
+        //                 $scope.captchadailogMsg = data;
+        //                 return;
+
+        //             }
+        //             else {
+        //                 $scope.captchaMsg = data;
+        //                 $scope.isResult = false;
+        //             }
+
+
+        //             $scope.Invalidreq = "false";
+        //         }
+        //         if (data === "Empty Data") {
+
+
+        //             $scope.allDetailsField = true;
+
+        //             $scope.Invalidreq = "false";
+        //         }
+        //         else
+
+        //         {
+        //             $scope.allDetailsField = false;
+        //             document.getElementById('mainContent').style.display = 'block';
+        //             document.getElementById('resultArea').style.display = 'block';
+        //         }
+        //         $scope.captchadailogMsg = "";
+        //      //   Changes made for requesting captcha after every 5 requests from pager 23-12-2019
+        //         if (data === "Invalid Request") {
+        //             $scope.clickToOpen();
+        //          //   $("#dialog_box_captcha").dialog("close");
+        //          //   $scope.loadPage(false);
+        //         }
+
+        //         else if(data ==="<!DOCTYPE html>"){
+        //             $scope.invalidInput = true;
+        //             $scope.isSuccess = false;
+        //             $scope.isResult = false;
+        //         }
+        //         else if (!data || data === "Error In service") {
+        //             $scope.isServiceError = true;
+        //             $scope.isSuccess = false;
+        //         }
+        //         else
+        //             $scope.showPagination(data);
+
+        //     }).error(function (data, status, headers, config) {
+        //         $scope.isServiceError = true;
+        //         $scope.isSuccess = false;
+        //     });
+        //     if ($scope.locationSource === "list") {
+        //         if ($scope.isACSelected === false)
+        //             $scope.selectedLocality = $scope.selectedState;
+        //     }
+        //     $scope.isLoading = false;
+        //     $scope.captcha = "";
+    };
+
+    $scope.nextPage = function () {
+        if ($scope.main.page < $scope.totalPages) {
+            $scope.main.page++;
+            $scope.fromPager = true;
+            $scope.loadPage(false);
+        }
+    };
+
+    $scope.previousPage = function () {
+        if ($scope.main.page > 1) {
+            $scope.main.page--;
+            $scope.fromPager = true;
+            $scope.loadPage(false);
+        }
+    };
+
+    $scope.goToPage = function (pageNumber) {
+        $scope.main.page = pageNumber;
+        $scope.fromPager = true;
+        $scope.loadPage(false);
+        for (var i = $scope.range[0]; i <= $scope.range[$scope.range.length - 1]; i++) {
+            var a = document.getElementById(i);
+            if (a !== null) {
+                if (i === pageNumber)
+                    a.style.color = "red";
+                else
+                    a.style.color = "";
+            }
+        }
+    };
+
+
+
+
+
+
+
+
+
+
+    //commented on 15/06/21
+    //$scope.loadMapArea = function () {
+    //    $("#" + "dialog").dialog("open");
+    //    initializeMap($scope, $http);
+    //};
+    // end
+    //    $scope.handleBlurEvent = function (stateName)
+    //    {
+    //        alert(stateName);
+    //        //alert(stateName.amount); //Old amount - not new amount entered
+    //    };
+});
+
+function _invalidReqUser() {
+    return _aquire();
+}
+
+
+
+
+
+//function _hits() {
+//    $.ajax({
+//        url: '/Home/TextCounter',
+//        success: function (data) {
+//            if (data !== null || data !== undefined) {
+//                document.getElementById('hitsStat').innerHTML = "<b>" + data + "</b>";
+//            }
+//        }
+//    });
+//}
+
+function initializeMap($scope, $http) {
+    var latitude = "28.6100";
+    var longitude = "77.2300";
+    var marker;
+
+    var map_canvas = document.getElementById('map_canvas');
+    var map_options = {
+        center: new google.maps.LatLng(latitude, longitude),
+        zoom: 9,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+    };
+
+    var map = new google.maps.Map(map_canvas, map_options);
+
+    var input = document.getElementById('pac-input');
+
+    map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+
+    var autocomplete = new google.maps.places.Autocomplete(input);
+    autocomplete.bindTo('bounds', map);
+
+    var infowindow = new google.maps.InfoWindow();
+
+    google.maps.event.addListener(autocomplete, 'place_changed', function () {
+        resetState($scope);
+        $scope.acList = [];
+        $scope.districtList = [];
+        infowindow.close();
+        var place = autocomplete.getPlace();
+        if (!place.geometry) {
+            return;
+        }
+
+        // If the place has a geometry, then present it on a map.
+        if (place.geometry.viewport) {
+            map.fitBounds(place.geometry.viewport);
+        } else {
+            map.setCenter(place.geometry.location);
+            map.setZoom(17);  // Why 17? Because it looks good.
+        }
+
+        //marker.setPosition(place.geometry.location);
+
+        latitude = place.geometry.location.lat();
+        longitude = place.geometry.location.lng();
+
+        document.getElementById("latitude").value = latitude;
+        document.getElementById("longitude").value = longitude;
+
+        marker.setMap(null);
+        marker = new google.maps.Marker({
+            position: new google.maps.LatLng(latitude, longitude),
+            map: map
+        });
+        resetState($scope);
+
+        marker.setVisible(true);
+        $.ajax({
+
+            url: "http://maps.googleapis.com/maps/api/geocode/xml?latlng=" + latitude + "," + longitude + "&sensor=false",
+            success: function (data) {
+                //debugger;
+                resetState($scope);
+                $scope.acList = [];
+                $scope.districtList = [];
+                document.getElementById("dialog_box_location").innerHTML = "<b style=\"font-size: 16px; color: navy\">Polling Station Location <br/><span style=\"font-size: 14px; color: green\">" + $(data).find("formatted_address").first().text() + "</span></b>";
+
+                if (document.getElementById("location_id_header") !== null) {
+                    document.getElementById("location_id_header").innerHTML = "स्थान/Location";
+                }
+                if (document.getElementById("location_id") !== null) {
+                    document.getElementById("location_id").innerHTML = "" + $(data).find("formatted_address").first().text() + "&nbsp;&nbsp;&nbsp;<img src=\"images/cross-red.PNG\" class='crossImg' alt=\"Remove Location\"  onclick=\"removeLocation()\">";
+                }
+            }
+        });
+    });
+
+    google.maps.event.addListener(map, "click", function (event) {
+        document.getElementById("latitude").value = event.latLng.lat().toFixed(6);
+        document.getElementById("longitude").value = event.latLng.lng().toFixed(6);
+        resetState($scope);
+        $scope.acList = [];
+        $scope.districtList = [];
+        marker.setMap(null);
+        latitude = event.latLng.lat().toFixed(6);
+        longitude = event.latLng.lng().toFixed(6);
+
+        marker = new google.maps.Marker({
+            position: new google.maps.LatLng(latitude, longitude),
+            map: map
+        });
+        marker.setVisible(true);
+
+        $.ajax({
+            url: "http://maps.googleapis.com/maps/api/geocode/xml?latlng=" + latitude + "," + longitude + "&sensor=false",
+            success: function (data) {
+                //  debugger;
+                resetState($scope);
+                $scope.acList = [];
+                $scope.districtList = [];
+                document.getElementById("dialog_box_location").innerHTML = "<b style=\"font-size: 16px; color: navy\">Polling Station Location <br/><span style=\"font-size: 14px; color: green\">" + $(data).find("formatted_address").first().text() + "</span></b>";
+
+                if (document.getElementById("location_id_header") !== null) {
+                    document.getElementById("location_id_header").innerHTML = "स्थान/Location";
+                }
+                if (document.getElementById("location_id") !== null) {
+                    document.getElementById("location_id").innerHTML = "" + $(data).find("formatted_address").first().text() + "&nbsp;&nbsp;&nbsp;<img src=\"images/cross-red.PNG\" class='crossImg' alt=\"Remove Location\"  onclick=\"removeLocation()\">";
+                }
+            },
+            error: function (xhr, status, error) {
+                resetState($scope);
+                $scope.acList = [];
+                $scope.districtList = [];
+                document.getElementById("dialog_box_location").innerHTML = "<b style=\"font-size: 16px; color: navy\">Polling Station Location <br/><span style=\"font-size: 14px; color: green\">" + latitude + ", " + longitude + "</span></b>";
+
+                if (document.getElementById("location_id_header") !== null) {
+                    document.getElementById("location_id_header").innerHTML = "LOCALITY";
+                }
+                if (document.getElementById("location_id") !== null) {
+                    document.getElementById("location_id").innerHTML = "" + latitude + ", " + longitude + "&nbsp;&nbsp;&nbsp;<img src=\"images/cross-red.PNG\" class='crossImg' alt=\"Remove Location\"  onclick=\"removeLocation()\">";
+                }
+            }
+        });
+    });
+    marker = new google.maps.Marker({
+        position: new google.maps.LatLng(latitude, longitude),
+        map: map
+    });
+    google.maps.event.addListener(marker, 'click', (function (marker, i) {
+        resetState($scope);
+        $scope.acList = [];
+        $scope.districtList = [];
+        return function () {
+            infowindow.setContent(latitude);
+            infowindow.open(map, marker);
+        };
+    })(marker, latitude));
+}
+function removeLocation() {
+    document.getElementById("location_id_header").innerHTML = "";
+    document.getElementById("location_id").innerHTML = "";
+    document.getElementById("latitude").value = "";
+    document.getElementById("longitude").value = "";
+}
+function resetState($scope) {
+    document.getElementById("nameStateList").selectedIndex = 0;
+    document.getElementById("namelocationList").selectedIndex = 0;
+    $scope.acList = [];
+    $scope.districtList = [];
+    $scope.stateName = "";
+    $scope.isACSelected = false;
+    $scope.isDistrictSelected = false;
+    $scope.selectedLocality = "";
+    $scope.selectedState = "";
+    $scope.selectedDistrict = "";
+    $scope.selectedAC = "";
+}

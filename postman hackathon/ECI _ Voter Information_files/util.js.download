@@ -1,0 +1,15 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+function clearErrorMessage(errorElementId) {
+    $("#" + errorElementId).text("");
+}
+function tabfunction(currentFocus, maxLength, nextFocus, event) {
+    var eventTemp = event.which || event.keyCode;
+    if (eventTemp !== 9) {
+        if (document.getElementById(currentFocus).value.length >= maxLength)
+            document.getElementById(nextFocus).focus();
+    }
+}

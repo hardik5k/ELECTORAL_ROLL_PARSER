@@ -1,0 +1,161 @@
+function isNullorEmpty(fieldvalue) {
+    var flag = false;
+    if (fieldvalue === '' || fieldvalue.length <= 0 || fieldvalue === 'undefined' || fieldvalue === undefined) {
+        flag = true;
+    }
+    else {
+        flag = false;
+    }
+    return flag;
+}
+function validateAAdharCardDetail(nameINAadhar, aadhaarNo, mobileNumber, mobileOwner, emailId, aadhaarNameErrorId, aadhaarNoErrorId, mobileNumberErrorId, mobileOwnerErrorId, emailIdErrorId) {
+    var isValid = false;
+    var isValidMobileNumber = false;
+    var isValidEmailId = false;
+    var isValidAadhaarNumber = false;
+    var isValidnameINAadhar = false;
+    var isValidMobileOwner = false;
+    document.getElementById(aadhaarNameErrorId).innerHTML = "";
+    document.getElementById(aadhaarNoErrorId).innerHTML = "";
+    document.getElementById(mobileNumberErrorId).innerHTML = "";
+    document.getElementById(mobileOwnerErrorId).innerHTML = "";
+    document.getElementById(emailIdErrorId).innerHTML = "";
+
+    // Case 1
+    if (mobileNumber.length !== 0) {
+        if (!isNaN(mobileNumber) && mobileNumber.length > 0 && mobileNumber.length === 10) {
+            isValidMobileNumber = true;
+        }
+        else {
+            isValidMobileNumber = false;
+            document.getElementById(mobileNumberErrorId).innerHTML = "Please Input Valid Mobile Number ";
+        }
+    }
+    else {
+        isValidMobileNumber = true;
+    }
+    var aadhaarMobilePattern = "^[A-Za-z]{1,50}$";
+    regex = new RegExp(aadhaarMobilePattern, 'i');
+    if (mobileNumber.length !== 0 && isValidMobileNumber === true) {
+        if (regex.test(mobileOwner)) {
+            isValidMobileOwner = true;
+        }
+        else {
+            isValidMobileOwner = false;
+            document.getElementById(mobileOwnerErrorId).innerHTML = "Please Select mobile number owner";
+        }
+    }
+    if (mobileNumber.length === 0 && isValidMobileNumber === true) {
+        isValidMobileOwner = true;
+    }
+
+    // Case 4
+    var filter = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
+
+    if (emailId.length !== 0) {
+        if (filter.test(emailId)) {
+            isValidEmailId = true;
+        }
+        else
+        {
+            isValidEmailId = false;
+            document.getElementById(emailIdErrorId).innerHTML = "Please Input Valid Email Id";
+        }
+    } else {
+        isValidEmailId = true;
+    }
+    // Aadhaar Validation
+    if (isNullorEmpty(aadhaarNo) === false) {
+        var pattern = "^[A-Za-z0-9 ]{12,12}$";
+        var regex = new RegExp(pattern, 'i');
+        if (regex.test(aadhaarNo)) {
+            isValidAadhaarNumber = true;
+        }
+        else {
+            isValidAadhaarNumber = false;
+            document.getElementById(aadhaarNoErrorId).innerHTML = "Please Input Valid Aadhaar card number";
+        }
+    } else {
+        isValidAadhaarNumber = false;
+        document.getElementById(aadhaarNoErrorId).innerHTML = "Please Input Valid Aadhaar card number";
+    }
+
+    // Validation in Aadhar
+    var aadhaarNamePattern = "^[A-Za-z ]{0,50}$";
+    regex = new RegExp(aadhaarNamePattern, 'i');
+    if (regex.test(nameINAadhar)) {
+        isValidnameINAadhar = true;
+    }
+    else {
+        isValidnameINAadhar = false;
+        document.getElementById(aadhaarNameErrorId).innerHTML = "Please Input Valid Name in Aadhaar";
+    }
+
+    if (isValidAadhaarNumber === true && isValidMobileNumber === true && isValidEmailId === true && isValidnameINAadhar === true && isValidMobileOwner === true)
+        isValid = true;
+    else
+        isValid = false;
+
+    return isValid;
+}
+
+function submit_aadhaar(voterid, epicno, from) {
+    if (from === 'id-no') {
+        document.getElementById('elector_epic_number_error').innerHTML = "";
+        epicno = document.getElementById('elector_epic_number').value;
+        voterid = "";
+    }
+
+    var aadhaarNoToken1 = document.getElementById('elector_aadhaar_no_token1').value;
+    var aadhaarNoToken2 = document.getElementById('elector_aadhaar_no_token2').value;
+    var aadhaarNoToken3 = document.getElementById('elector_aadhaar_no_token3').value;
+    var aadhaarNo = aadhaarNoToken1 + aadhaarNoToken2 + aadhaarNoToken3;
+    var nameINAadhar = document.getElementById('elector_aadhaar_name').value;
+
+    var mobileNo = document.getElementById('elector_mobile_no').value;
+    var emailId = document.getElementById('elector_email_id').value;
+    var mobileOwner = document.getElementById('mobile_no_owner').value;
+    var isValid = validateAAdharCardDetail(nameINAadhar, aadhaarNo, mobileNo, mobileOwner, emailId, 'elector_aadhaar_name_error', 'elector_aadhaar_no_error', 'elector_mobile_no_error', 'elector_mobile_no_owner__error', 'elector_email_id_error');
+
+    if (from === 'id-no') {
+        if (epicno === undefined || epicno === 'undefined' || epicno === '' || epicno.length === 0 || epicno.length > 17) {
+            document.getElementById('elector_epic_number_error').innerHTML = "Please enter valid epic number";
+            isValid = false;
+        }
+    }
+    var xmlhttp;
+    if (isValid === true) {
+        if (window.XMLHttpRequest) {
+            // code for IE7+, Firefox, Chrome, Opera, Safari
+            xmlhttp = new XMLHttpRequest();
+        } else {
+            // code for IE6, IE5
+            xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+        var parameters = "voterid=" + voterid + "&epicno=" + epicno + "&aadhaarno=" + aadhaarNo + "&mobileNo=" + mobileNo + "&emailId=" + emailId + "&nameInAadhar=" + nameINAadhar + "&mobileOwner=" + mobileOwner + "&from=" + from;
+        xmlhttp.onreadystatechange = function () {
+            if (xmlhttp.readyState === 4) {
+                if (xmlhttp.status === 200) {
+                    document.getElementById('aadhaar_card_error_id').innerHTML = xmlhttp.responseText;
+                }
+                else if (xmlhttp.status === 400) {
+                    document.getElementById('aadhaar_card_error_id').innerHTML = xmlhttp.responseText;
+                }
+                else {
+                    document.getElementById('aadhaar_card_error_id').innerHTML = xmlhttp.responseText;
+                }
+            }
+        };
+
+        xmlhttp.open("POST", "aadhaarCard", true);
+        xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xmlhttp.send(parameters);
+    }
+}
+
+function clear_aadhaar_model_box() {
+    $("#aadhaar_form").trigger("reset");
+    $(".error").text("");
+    $("#aadhaar_card_error_id").text("");
+    $("#elector_aadhaar_name").focus();
+}

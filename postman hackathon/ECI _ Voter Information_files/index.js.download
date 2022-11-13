@@ -1,0 +1,49 @@
+/*
+ *
+ *If a user click "Feed Aadhaar number " on nvsp then a query string "feedaadhaar" is appended
+ *and by default 'Feed aadhaar number dialog box' is kept open.
+ */
+function displayWelcomeOrAadhaarDialogBox() {
+    try {
+//        var queryString = window.document.location.search.substring(1,
+//                window.document.location.search.length);
+//        if (queryString === "feedaadhaar") {
+//            feedAadhaarCardDialogBox($('#idInRow').val(), $('#epicNoInRow').val(), 'id-no');
+//
+//        } else {
+//            if (checkAndSet())
+//                welcomeDialog();
+//        }
+        if (checkAndSet())
+                welcomeDialog();
+    }
+    catch (err) {
+    }
+}
+
+function checkAndSet() {
+    if (document.cookie.indexOf("runOnce") < 0) {
+        var d = new Date();
+        document.cookie = "runOnce=true; expires=new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1, 0, 0, 0, 0); path = /;SameSite=Strict;secure";
+        return true;
+    }
+    return false;
+}
+
+function floatingKeyboardScript() {
+   // debugger;
+    try {
+        onlyAllowTypingOnKbdOpen(true);
+
+        $('.fkbd').click(function () {
+          //  debugger;
+            closeKeyboard();
+            openKeyboard('hindi');
+        });
+    }
+    catch (err) {
+    }
+
+
+ 
+}

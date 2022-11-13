@@ -1,0 +1,46 @@
+/*
+ * This function is used to generate welcome dialog box.
+ * @returns {none}
+ */
+
+function welcomeDialog() {
+    $("#welcomeDialog" + ":ui-dialog").dialog("destroy");
+    /*
+     * Welcome Dialog
+     */
+    if ($(window).innerWidth() > 700) {
+        $("#welcomeDialog").dialog({
+            autoOpen: true,
+            modal: true,
+            width: "60%",
+            open: function (event, ui) {
+                //$(".ui-dialog-titlebar").addClass("ui-dialog-titlebar0");
+                $(".ui-dialog").addClass("ui-dialog0");
+                $(".ui-dialog-titlebar").hide();
+            },
+            close: function () {
+                //$(".ui-dialog-titlebar").removeClass("ui-dialog-titlebar0");
+                $(".ui-dialog").removeClass("ui-dialog0");
+                $(".ui-dialog-titlebar").show();
+            },
+            autoReposition: true
+        });
+
+        $("#continue").click(function () {
+            $("#welcomeDialog").dialog("close");
+        });
+    } else {
+        $("#banner").css('background-image', 'url("images/logoMINI.png")');
+    }
+
+    $(window).resize(function () {
+        if ($(window).innerWidth() < 300) {
+            $("#welcomeDialog" + ":ui-dialog").dialog("destroy");
+            $("#banner").css('background-image', 'url("images/logoMINI.png")');
+        } else {
+            $("#banner").css('background-image', 'url("images/logonew.png")');
+
+            $("#welcomeDialog").dialog("option", "position", {my: "center", at: "center", of: window});
+        }
+    });
+}

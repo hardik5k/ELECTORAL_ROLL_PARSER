@@ -1,0 +1,156 @@
+﻿
+isCaptchaReloading = false;
+function reloadCaptchaImage(btnId, imgId) {
+    $(btnId).click(function () {
+        if (isCaptchaReloading === false || isCaptchaReloading == "undefined") {
+            isCaptchaReloading = true;
+            setTimeout(function () {
+                $(imgId).attr("src", "/Home/GetCaptcha?image=true&id=" + new Date());
+                isCaptchaReloading = false;
+            }, 1000);
+        } else {
+            custom_alert("Please wait, we are processing your previous request", "Relaoding Captcha", true);
+        }
+    });
+}
+
+
+
+
+
+
+var snd;
+
+function PlayFile(btnId) {
+
+    $(btnId).click(function () {
+        $.ajax({
+            url: '/Home/PlayFile',
+            success: function (data1) {
+                if (snd != undefined) {
+                    snd.pause();
+                    snd.currentTime = 0;
+                }
+
+                snd = new Audio("data:audio/wav;base64," + data1);
+
+                snd.play();
+
+            }
+
+        });
+    });
+}
+
+
+
+function play()
+{
+
+    var source = context.createBufferSource();
+    source.buffer = buf;
+
+    source.connect(context.destination);
+
+    source.start(0);
+}
+
+function custom_alert(output_msg, title_msg, autoclose) {
+    if (!title_msg)
+        title_msg = 'Alert';
+    if (!output_msg)
+        output_msg = 'No Message to Display.';
+    $("<div></div>").html(output_msg).dialog({
+        title: title_msg,
+        resizable: true,
+        modal: true,
+        open: function (event, ui) {
+            if (autoclose === true) {
+                var dlg = $(this);
+                setTimeout(function () {
+                    dlg.dialog("close");
+                }, 1700);
+            }
+        }
+
+    });
+}
+
+
+$(document).ready(function () {
+
+
+    displayWelcomeOrAadhaarDialogBox();
+    reloadCaptchaImage('#reloadCaptchaDetailBtn', '#captchaDetailImg');
+    reloadCaptchaImage('#reloadCaptchaEpicBtn', '#captchaEpicImg');
+
+
+    reloadCaptchaImage('#reloadCaptchadailogBtn', '#captchaDailogImg');
+
+
+    PlayFile('#audioimg');
+    PlayFile('#Epicaudioimg');
+
+
+    PlayFile('#audiodailogimg');
+
+
+
+    $("#" + "dialog" + ":ui-dialog").dialog("destroy");
+    $("#" + "dialog").dialog({
+        autoOpen: false,
+        modal: true,
+        width: "60%",
+        buttons: {
+            Ok: function () {
+                $(this).dialog("close");
+                if (document.getElementById("dialog_box_location") !== null) {
+                    document.getElementById("dialog_box_location").innerHTML = "<b style=\"font-size: 20px; color: navy\">Set your location on Map</b>";
+                }
+                if (document.getElementById("mapSearchBox") !== null) {
+                    document.getElementById("mapSearchBox").innerHTML = "<input id=\"pac-input\" class=\"controls\" type=\"text\" placeholder=\"Enter a location\" />";
+                }
+            }
+        }
+    });
+
+
+
+
+
+
+    $("#dialogViewMap" + ":ui-dialog").dialog("destroy");
+    $("#dialogViewMap").dialog({
+        autoOpen: false,
+        modal: true,
+        width: "60%",
+        buttons: {
+            Ok: function () {
+
+                $(this).dialog("close");
+            }
+        }
+    });
+
+
+
+
+
+
+
+
+
+
+
+
+    $('#resultsDiv').hover(function () {
+
+    }, function () {
+        $('#ps_msg_div').css({ display: "none" });
+    });
+
+    floatingKeyboardScript();
+});
+function _aquire() {
+    return 'ca3ac2c8-4676-48eb-9129-4cdce3adf6ea';
+}

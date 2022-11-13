@@ -1,0 +1,179 @@
+/*
+    Created on : Jul 9, 2015, 11:37:27 AM
+    Author     : Kapil Gupta
+This css is applied only and only on indes page of electoral search.
+*/
+
+#map_canvas {
+    width: 100%;
+    height: 400px;
+}
+#mapView {
+    width: 100%;
+    height: 400px;
+}
+.logo {
+    position: relative;
+    top: -0.5em;
+}
+.logo a, .logo a:visited {
+    text-decoration: none;
+    color: #2B2B2D;
+}
+.logo img {
+    height: 2em;
+    position: relative;
+    top: 0.55em;
+    margin-right: 0.3em;
+}
+.loading-container {
+    position: relative;
+}
+.loading-container .loading:before, .loading-container .loading:after {
+    content: " ";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    min-height: 50px;
+    min-width: 50px;
+}
+.loading-container .loading:before {
+    background-color: white;
+    opacity: 0.5;
+}
+pagerList, div[pagerList] {
+    width: 550px;
+    height: 35px;
+    font-size: 16px;
+    font-family: Tahoma, Geneva, sans-serif;
+    font-weight: bold;
+    text-align: center;
+
+    border-radius: 8px;
+    display: table;
+    margin: 0 auto;
+}
+#map-canvas {
+    height: 420px;
+    margin: 0px;
+    padding: 0px;
+    border:1px solid
+}
+.controls {
+    margin-top: 16px;
+    border: 1px solid transparent;
+    border-radius: 2px 0 0 2px;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    height: 32px;
+    outline: none;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+#pac-input {
+    background-color: #fff;
+    padding: 0 11px 0 13px;
+    width: 350px;
+    font-family: Roboto;
+    font-size: 15px;
+    font-weight: 300;
+    text-overflow: ellipsis;
+}
+
+#pac-input:focus {
+    border-color: #4d90fe;
+    margin-left: -1px;
+    padding-left: 14px;  /* Regular padding-left + 1. */
+    width: 401px;
+}
+
+.pac-container {
+    font-family: Roboto;
+}
+
+#type-selector {
+    color: #fff;
+    background-color: #4d90fe;
+    padding: 5px 11px 0px 11px;
+}to
+
+#type-selector label {
+    font-family: Roboto;
+    font-size: 13px;
+    font-weight: 300;
+}
+
+.crossImg:hover{
+    cursor: pointer;
+}
+ul.list li{
+    width: auto;
+    float: left;
+}
+#hitsStat{
+    border: 1px solid;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 15px;
+    padding-right: 15px;
+    background: #999;
+    color: white;
+}
+.container{
+    max-width: 99% !important;
+}
+.ps_location{
+    position: fixed;
+    bottom:0;
+    right:0;
+    box-shadow: 0px 2px 3px #888888;
+    z-index:50;
+    background: #258CD1;
+    color: white;
+    border-color: #258cd1;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.ui-dialog0{
+    border: 0 none;
+    background: transparent !important;
+}
+.ui-dialog-titlebar0 {
+    visibility: hidden;
+}
+
+#welcomeDialog {
+    min-width: 80%;
+    max-width: 100%;
+    height: 400px;
+}
+.main {
+    /* border: 12px solid white; */
+    border-radius: 2px;
+    box-shadow: 0 0 10px;
+    float: left;
+    font-size: 13px;
+    margin-top: 35px;
+    padding: 20px 25px 25px;
+}
+.ui-widget-overlay {
+    opacity: .70;
+    filter:Alpha(Opacity=70);
+}
+.bg {background: #2f86a8;padding: 5px;}
+#menu_css  ul { margin: 2px 10px; }
+#menu_css  ul li { float: left; list-style-type: none;font-size: 13px; }
+#menu_css   ul li a { background: #ffffff; color: #000; display: block; font-family: SakalBharati_N_Ship ,Arial, Helvetica, sans-serif; padding: 10px 20px; text-decoration: none; }
+#menu_css  ul li a:hover { color: #3075AB;}
+.footer{ font-size: 15px; display: table;  text-align: center;   margin-left: auto;   margin-right: auto;  margin-top: 12px; background: #2f86a8; width: 100%;}
+
+a[target="_blank"] .rvote_css{
+    content: "" !important;
+}
+a.rvote_css::after, a.rvote_css::before{
+    font-family: serif;
+    content: "" !important;
+}
