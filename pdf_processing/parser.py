@@ -1,4 +1,4 @@
-from tabula.io import read_pdf
+from tabula.io import read_pdf  
 import math
 import pandas as pd
 import sys
@@ -30,6 +30,8 @@ else:
     high = math.floor(ser_no/31) + 3
     low = math.floor(ser_no/31) + 3
 
+
+print(low,high)
 flag = low-high
 for page in range(low,high+1,1):
 
@@ -38,13 +40,13 @@ for page in range(low,high+1,1):
         x1 = x_1 +  i*w
         x2 = x_2 +  i*w
 
-        y1 = y_1 + (math.floor(ser_no/3)-1)*h
-        y2 = y_1 + h
+        y1 = y_1 + (math.floor((ser_no%31)/3 - 2))*h
+        y2 = y_1 + h + (math.floor((ser_no%31)/3 - 2))*h
         for j in range(3):
-            y1 = y_1 +  j*h 
-            y2 = y_2 +  j*h 
-      # print(y1,x1,y2,x2)
-            data = read_pdf(file, pages=page, area=(y1, x1, y2, x2-w/3), encoding='ISO-8859-1')
+            y1 = y1 +  h 
+            y2 = y2 +  h 
+            print(y1,x1,y2,x2)
+            data = read_pdf(file, pages=page, area=(y1, x1, y2, x2-w/3))
             persons.append(data)
   else:
     for i in range(3):
@@ -59,8 +61,8 @@ for page in range(low,high+1,1):
             y2 = y_2 +  j*h 
 
         # print(y1,x1,y2,x2)
-        data = read_pdf(file, pages=page, area=(y1, x1, y2, x2-w/3), encoding='ISO-8859-1')
-        persons.append(data)
+            data = read_pdf(file, pages=page, area=(y1, x1, y2, x2-w/3))
+            persons.append(data)
 
 def remove_el(el,list1):
   for i in el:
@@ -173,7 +175,7 @@ pn = sys.argv[2]
 opp_relations = {'F' : 'S', 'S' : 'F', 'W' : 'H', 'H' : 'W', 'M' : 'S', 'S' : 'M'}
 relations = ['F', 'S', 'M', 'H', 'W']
 
-x = get_relations(pn, '', persons_obj)
+# x = get_relations(pn, '', persons_obj)
 
 person_relations = []
 
@@ -182,8 +184,19 @@ for i in persons_obj:
     for r in relations:
       if (i[r]):
           print(i[r], r)
-          break
+
+          for i_1 in persons_obj:
+            if (similar(i_1['Name'].split()[0], i[r].split()[0]) > 0.8) :
+                for r1 in relations:
+                    if (i_1[r1]!=""):        
+                        print(i_1[r1], r+r1)
+          
   else:
     for r in relations:
       if (i[r]!="" and similar(i[r].split()[0], pn.split()[0]) > 0.85):        
         print(i['Name'], opp_relations[r])
+
+        for i_1 in persons_obj:
+            for r1 in relations:
+                if (i_1[r1]!="" and similar(i_1[r1].split()[0], i["Name"].split()[0]) > 0.85):        
+                    print(i_1['Name'], opp_relations[r]+opp_relations[r1])
