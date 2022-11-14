@@ -6,10 +6,10 @@ This project aims to create an API that recieves 4 parameters - NAME, AGE, FATHE
 This directory contanins two important files.
 1. pdf_processing - This folder contains scripts to parse electoral rolls and works for **any pdf in english language.**
 
-**command to run - ./test.sh  <input_pdf_name>   <name_of_the_person>    <serial_number_of_the_person>**
+command to run - ./test.sh
 
 test.sh is a bash file which takes 3 inputs as parameters - 
-  * The electoral roll pdf
+  * The electoral roll pdf <input_pdf_name>
   * Name of the person to search
   * Serial Number obtained from https://electoralsearch.in/
   
