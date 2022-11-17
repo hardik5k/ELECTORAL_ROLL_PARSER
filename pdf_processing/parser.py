@@ -170,7 +170,7 @@ def get_relations(name,rel,persons_obj):
 
   return list(filter(func, persons_obj))
 
-pn = sys.argv[2]
+pn = sys.argv[2].replace('_', ' ')
 
 opp_relations = {'F' : 'S', 'S' : 'F', 'W' : 'H', 'H' : 'W', 'M' : 'S', 'S' : 'M'}
 relations = ['F', 'S', 'M', 'H', 'W']
