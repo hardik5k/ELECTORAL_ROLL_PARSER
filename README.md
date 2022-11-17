@@ -10,7 +10,7 @@ command to run - ./test.sh
 
 test.sh is a bash file which takes 3 inputs as parameters - 
   * The electoral roll pdf <input_pdf_name>
-  * Name of the person to search
+  * Name of the person to search (with underscores) (Eg. Hardik_Khandelwal)
   * Serial Number obtained from https://electoralsearch.in/
   
 It decrypts the pdf, makes it text parsable and runs the python script parser.py that uses dfs to generate family tree.
